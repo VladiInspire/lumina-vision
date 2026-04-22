@@ -224,13 +224,24 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#e8f5f4" }}>
-      <header className="py-5 px-8 text-left shrink-0" style={{ backgroundColor: "#ffdf5e" }}>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-          Lumina Vision
-        </h1>
-        <p className="mt-1 text-gray-700 font-medium text-sm">
-          Když chceš, aby vizuál nebyl jen hezký, ale i chytrý.
-        </p>
+      <header className="py-5 px-8 shrink-0 flex items-center justify-between" style={{ backgroundColor: "#ffdf5e" }}>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+            Lumina Vision
+          </h1>
+          <p className="mt-1 text-gray-700 font-medium text-sm">
+            Když chceš, aby vizuál nebyl jen hezký, ale i chytrý.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            localStorage.removeItem("lumina_api_key");
+            setSavedKey("");
+          }}
+          className="text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-700 rounded-xl px-4 py-2 transition-colors hover:bg-yellow-200 shrink-0"
+        >
+          Změnit API klíč
+        </button>
       </header>
 
       <main className="flex-1 overflow-y-auto w-full px-8 py-6" style={{ minHeight: 0 }}>
