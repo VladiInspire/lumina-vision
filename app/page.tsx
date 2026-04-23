@@ -254,8 +254,8 @@ export default function Home() {
               return (
                 <div key={i} className="flex flex-row items-start gap-2">
                   <LuminaAvatar />
-                  <div className="max-w-[80%] rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm bg-white text-gray-900">
-                    <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+                  <div className="max-w-[80%] min-w-0 overflow-hidden rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm bg-white text-gray-900">
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none break-words">
                       <ReactMarkdown
                         components={{
                           p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
