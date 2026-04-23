@@ -73,12 +73,41 @@ export default function Home() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Obrázek je příliš velký. Nahraj prosím soubor do 10 MB.");
+      e.target.value = "";
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
-      const base64 = dataUrl.split(",")[1];
-      const mediaType = file.type;
-      setPendingImage({ base64, mediaType, preview: dataUrl });
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1024;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          if (width > height) {
+            height = Math.round((height * MAX) / width);
+            width = MAX;
+          } else {
+            width = Math.round((width * MAX) / height);
+            height = MAX;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL("image/jpeg", 0.85);
+        setPendingImage({
+          base64: compressed.split(",")[1],
+          mediaType: "image/jpeg",
+          preview: compressed,
+        });
+      };
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
     e.target.value = "";

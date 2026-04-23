@@ -62,9 +62,17 @@ function normalizeMessages(raw: { role: string; content: string | RawContentBloc
 }
 
 export async function POST(request: Request) {
+  let messages: unknown, apiKey: unknown;
   try {
-    const { messages, apiKey } = await request.json();
+    ({ messages, apiKey } = await request.json());
+  } catch {
+    return Response.json(
+      { error: "Požadavek je příliš velký nebo obsahuje neplatná data. Zkus nahrát menší obrázek." },
+      { status: 413 }
+    );
+  }
 
+  try {
     if (!apiKey) {
       return Response.json({ error: "API klíč chybí" }, { status: 400 });
     }
@@ -73,13 +81,28 @@ export async function POST(request: Request) {
       return Response.json({ error: "Zprávy chybí" }, { status: 400 });
     }
 
-    const client = new Anthropic({ apiKey });
+    // Guard against oversized base64 image data (~3 MB limit after encoding)
+    const MAX_BASE64 = 3 * 1024 * 1024;
+    for (const msg of messages as { role: string; content: unknown }[]) {
+      if (Array.isArray(msg.content)) {
+        for (const block of msg.content as RawContentBlock[]) {
+          if (block.type === "image" && block.source.data.length > MAX_BASE64) {
+            return Response.json(
+              { error: "Obrázek je příliš velký. Nahraj prosím menší nebo jinak komprimovaný soubor." },
+              { status: 413 }
+            );
+          }
+        }
+      }
+    }
+
+    const client = new Anthropic({ apiKey: apiKey as string });
 
     const response = await client.messages.create({
       model: "claude-sonnet-4-5",
       max_tokens: 2000,
       system: SYSTEM_PROMPT,
-      messages: normalizeMessages(messages),
+      messages: normalizeMessages(messages as { role: string; content: string | RawContentBlock[] }[]),
     });
 
     const textContent = response.content.find((c) => c.type === "text");
